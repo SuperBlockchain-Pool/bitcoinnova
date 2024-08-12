@@ -10,9 +10,9 @@ env:
 
 jobs:
   # Common Build matrix for builds on Ubuntu VM
-  ubuntu_build:
+  ubuntu_20_build:
     name: ${{ matrix.build_name }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -38,7 +38,7 @@ jobs:
       CCACHE_DIR: $GITHUB_WORKSPACE/.ccache
       LABEL: ${{ matrix.label }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Fetch Dependencies
       - name: Dependencies
@@ -50,7 +50,7 @@ jobs:
         run: |
           sudo apt install ccache
       - name: Retrieve ccache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: .ccache
           key: ccache-${{ matrix.label }}
@@ -127,24 +127,24 @@ jobs:
   # Mac builds
   macos_build:
     name: macOS
-    runs-on: macos-10.15
+    runs-on: macos-12
     env:
-      CC: /usr/local/opt/llvm@8/bin/clang
-      CXX: /usr/local/opt/llvm@8/bin/clang++
+      CC: /usr/local/opt/llvm@14/bin/clang
+      CXX: /usr/local/opt/llvm@14/bin/clang++
       LABEL: osx
       CCACHE_DIR: $GITHUB_WORKSPACE/.ccache
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Fetch Dependencies
       - name: Dependencies
         run: |
-          brew uninstall --force llvm
-          brew install --force boost llvm@8 ccache
-          brew link --overwrite llvm@8
-          ln -s /usr/local/opt/llvm@8 /usr/local/opt/llvm
+           brew install --force boost llvm@14 ccache
+           brew reinstall llvm@14
+           brew link --overwrite llvm@14
+           ln -s /usr/local/opt/llvm@14 /usr/local/opt/llvm
       - name: Retrieve ccache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: .ccache
           key: ccache-osx
