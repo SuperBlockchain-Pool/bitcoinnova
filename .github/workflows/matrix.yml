@@ -119,7 +119,7 @@ jobs:
 
       # Upload to GH Actions Artifacts
       - name: Upload To GH Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.before_deploy.outputs.artifact_name }}
           path: ./build/src/${{ steps.before_deploy.outputs.binary_path }}
@@ -154,17 +154,19 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DARCH=default -DCMAKE_BUILD_TYPE=Release -DSTATIC=true ..
+          
       # Build for macOS
       - name: Build
         run: |
           cd build
           make -j2
+          
       # Test the crypto
       - name: Test Crypto
-        if: matrix.build_name != 'aarch64'
         run: |
           cd build/src
           ./cryptotest
+          
       # Prepare for deploy
       - name: Prepare for Deploy
         id: before_deploy
@@ -183,6 +185,7 @@ jobs:
           echo ::set-output name=binary_path::BitcoinNova-${TAG}
           echo ::set-output name=artifact_name::BitcoinNova-${TAG}-${LABEL}
           echo ::set-output name=file_name::BitcoinNova-${TAG}-${LABEL}.tar.gz
+          
       # Upload to GH Release
       - name: Upload to GH Release
         if: github.event_name == 'release'
@@ -197,25 +200,25 @@ jobs:
 
       # Upload to GH Actions Artifacts
       - name: Upload To GH Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.before_deploy.outputs.artifact_name }}
           path: ./build/src/${{ steps.before_deploy.outputs.binary_path }}
 
   windows_build:
     name: Windows
-    runs-on: windows-2019
+    runs-on: windows-latest
     env:
-      MSBUILD_PATH: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin"
+      MSBUILD_PATH: "C:/Program Files (x86)/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin"
       LABEL: windows
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup clcache
         run: pip install clcache
 
       - name: Retrieve clcache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: clcache
           key: clcache-windows
@@ -231,12 +234,14 @@ jobs:
           [Net.WebClient]::new().DownloadFile($link, $path)
           Start-Process C:\boost.exe -ArgumentList "/DIR=C:\local\boost_1_78_0","/VERYSILENT" -Wait
           Get-ChildItem C:\local\boost_1_78_0
+          
       # Configure project with cmake
       - name: Configure
         run: |
           mkdir build
           cd build
           cmake -G "Visual Studio 16 2019" -A x64 .. -DARCH=default -DBOOST_ROOT=C:/local/boost_1_78_0
+      
       # Build for Windows
       - name: Build
         run: |
@@ -244,12 +249,14 @@ jobs:
           $env:PATH = "$env:PATH;$env:MSBUILD_PATH"
           cd build
           MSBuild BitcoinNova.sln /p:Configuration=Release /p:PlatformToolset=v142 /m
+      
       # Test the crypto
       - name: Test Crypto
         shell: bash
         run: |
           cd build/src/Release
           ./cryptotest.exe
+      
       # Prepare for deploy
       - name: Prepare for Deploy
         shell: bash
@@ -267,6 +274,7 @@ jobs:
           echo ::set-output name=binary_path::BitcoinNova-${TAG}
           echo ::set-output name=artifact_name::BitcoinNova-${TAG}-${LABEL}
           echo ::set-output name=file_name::BitcoinNova-${TAG}-${LABEL}.zip
+      
       # Upload to GH Release
       - name: Upload to GH Release
         if: github.event_name == 'release'
@@ -281,7 +289,7 @@ jobs:
 
       # Upload to GH Actions Artifacts
       - name: Upload To GH Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.before_deploy.outputs.artifact_name }}
           path: ./build/src/Release/${{ steps.before_deploy.outputs.binary_path }}
