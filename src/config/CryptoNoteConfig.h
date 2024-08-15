@@ -131,7 +131,7 @@ namespace CryptoNote
 
         const uint64_t DEFAULT_MIXIN_V2 = MAXIMUM_MIXIN_V2;
 
-        const uint64_t DEFAULT_MIXIN_V3 = MAXIMUM_MIXIN_V3;
+        const uint64_t DEFAULT_MIXIN_V3 = MINIMUM_MIXIN_V3;
 
         const uint64_t DEFAULT_DUST_THRESHOLD = UINT64_C(10000);
 
